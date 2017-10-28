@@ -1,0 +1,15 @@
+*.swp
+*.swo
+node_modules/
+build/
+.DS_Store/
+/coverage
+coverage.json
+allFiredEvents
+scTopics
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
