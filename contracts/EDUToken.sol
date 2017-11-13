@@ -4,9 +4,21 @@ import 'zeppelin-solidity/contracts/token/StandardToken.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 
+contract Certifier {
+	event Confirmed(address indexed who);
+	event Revoked(address indexed who);
+	function certified(address) public constant returns (bool);
+	function get(address, string) public constant returns (bytes32);
+	function getAddress(address, string) public constant returns (address);
+	function getUint(address, string) public constant returns (uint);
+}
+
+
 contract EDUToken is StandardToken {
 
     using SafeMath for uint256;
+
+    Certifier public certifier;
 
     // EVENTS
     event CreatedEDU(address indexed _creator, uint256 _amountOfEDU);
@@ -99,6 +111,7 @@ contract EDUToken is StandardToken {
         address _multisigBountyProgramAddress,
         address _multisigAddress
     ) {
+        certifier = Certifier(0x1e2F058C43ac8965938F6e9CA286685A3E63F24E);
         ownerAddress = msg.sender;                                              // Store owners address
         earlyPresaleAddress = _earlyPresaleAddress;                             // Store early presale address
         presaleAddress = _presaleAddress;                                       // Store presale address
@@ -142,6 +155,11 @@ contract EDUToken is StandardToken {
         minimalContribution
     {
         require(allowContribution);
+
+        // Only PICOPS certified addresses will be allowed to participate
+        if (!certifier.certified(msg.sender)) {
+            revert();
+        }
 
         // Transaction value in Wei
         uint256 amountInWei = msg.value;
