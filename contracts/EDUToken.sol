@@ -6,10 +6,10 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract Certifier {
     event Confirmed(address indexed who);
     event Revoked(address indexed who);
-    function certified(address) public constant returns (bool);
-    function get(address, string) public constant returns (bytes32);
-    function getAddress(address, string) public constant returns (address);
-    function getUint(address, string) public constant returns (uint);
+    function certified(address) public view returns (bool);
+    function get(address, string) public view returns (bytes32);
+    function getAddress(address, string) public view returns (address);
+    function getUint(address, string) public view returns (uint);
 }
 
 contract EDUToken is BurnableToken {
@@ -49,7 +49,7 @@ contract EDUToken is BurnableToken {
 
     modifier validDestination( address to ) {
         require(to != address(0x0));
-        require(to != address(this) );
+        require(to != address(this));
         _;
     }
 
