@@ -68,16 +68,14 @@ contract EDUToken is StandardToken {
         _;
     }
 
-    function EDUToken(
+    constructor(
         address _saleAddress,
         address _sigTeamAndAdvisersAddress,
         address _sigBountyProgramAddress,
         address _certifierAddress,
         address _contributionsAddress,
         uint256 _EDU_PER_ETH
-    )
-        public
-    {
+    ) public {
         certifier = Certifier(_certifierAddress);
 
         EDU_PER_ETH = _EDU_PER_ETH;
