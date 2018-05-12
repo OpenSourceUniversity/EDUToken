@@ -1,6 +1,7 @@
 pragma solidity ^0.4.21;
 
 import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract Certifier {
