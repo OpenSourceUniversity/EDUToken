@@ -1,7 +1,7 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.21;
 
-import 'zeppelin-solidity/contracts/token/StandardToken.sol';
-import 'zeppelin-solidity/contracts/math/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract Certifier {
     event Confirmed(address indexed who);
@@ -13,76 +13,51 @@ contract Certifier {
 }
 
 contract EDUToken is StandardToken {
-
     using SafeMath for uint256;
 
+    // Call certifier
     Certifier public certifier;
 
-    // EVENTS
-    event CreatedEDU(address indexed _creator, uint256 _amountOfEDU);
-    event Transfer(address indexed _from, address indexed _to, uint _value);
-    event Approval(address indexed _owner, address indexed _spender, uint _value);
+    event EDUtransfered(address receiver, uint256 _amountOfEDU);
+    event ETHcontributed(address contributor, uint256 _amountOfETH);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
     // GENERAL INFORMATION ABOUT THE TOKEN
     string public constant name = "EDU Token";
-    string public constant symbol = "EDU";
-    uint256 public constant decimals = 4;
-    string public version = "1.0";
-
-    // CONSTANTS
-    // Purchase limits
-    uint256 public constant TotalEDUSupply = 48000000*10000;                    // MAX TOTAL EDU TOKENS 48 million
-    uint256 public constant maxEarlyPresaleEDUSupply = 2601600*10000;           // Maximum EDU tokens early presale supply (Presale Stage 1)
-    uint256 public constant maxPresaleEDUSupply = 2198400*10000;                // Maximum EDU tokens presale supply (Presale Stage 2)
-    uint256 public constant OSUniEDUSupply = 8400000*10000;                     // Open Source University EDU tokens supply
-    uint256 public constant SaleEDUSupply = 30000000*10000;                     // Allocated EDU tokens for crowdsale
-    uint256 public constant sigTeamAndAdvisersEDUSupply = 3840000*10000;        // EDU tokens supply allocated for team and advisers
-    uint256 public constant sigBountyProgramEDUSupply = 960000*10000;           // EDU tokens supply allocated for bounty program
-
-    //ASSIGNED IN INITIALIZATION
-    // Time limits
-    uint256 public preSaleStartTime;                                            // Start presale time
-    uint256 public preSaleEndTime;                                              // End presale time
-    uint256 public saleStartTime;                                               // Start sale time (start crowdsale)
-    uint256 public saleEndTime;                                                 // End crowdsale
-
-    // Purchase limits
-    uint256 public earlyPresaleEDUSupply;
-    uint256 public PresaleEDUSupply;
-
-    // Refund in EDU tokens because of the KYC procedure
-    uint256 public EDU_KYC_BONUS = 50*10000;                                    // Bonus 50 EDU tokens for the KYC procedure
-
-    // Lock EDU tokens
-    uint256 public LockEDUTeam;                                                 // Lock EDU tokens relocated for the team
-
-    // Token bonuses
-    uint256 public EDU_PER_ETH_EARLY_PRE_SALE = 1350;                           // 1350 EDU = 1 ETH  presale stage 1  until the quantities are exhausted
-    uint256 public EDU_PER_ETH_PRE_SALE = 1200;                                 // 1200 EDU = 1 ETH  presale stage 2
-
-    // Token sale
-    uint256 public EDU_PER_ETH_SALE;                                            // Crowdsale price which will be anaunced after the alpha version of the OSUni platform
+    string public constant symbol = "EDUx";
+    uint256 public constant decimals = 18;
+    string public version = "2.0";
 
     // Addresses
     address public ownerAddress;                                                // Address used by Open Source University
-    address public presaleAddress;                                              // Address used in the presale period
     address public saleAddress;                                                 // Address used in the crowdsale period
     address public sigTeamAndAdvisersAddress;                                   // EDU tokens for the team and advisers
     address public sigBountyProgramAddress;                                     // EDU tokens bounty program
-    address public contributionsAddress;                                        // Address used for contributions
+    address public contributionsAddress;
+    address public certifierAddress;
 
-    // Contribution indicator
-    bool public allowContribution = true;                                       // Flag to change if transfering is allowed
+    // EDU amounts
+    uint256 public TotalEDUSupply;
+    uint256 public TokensForSale;
+    uint256 public OSUniEDUSupply;
+    uint256 public sigTeamAndAdvisersEDUSupply;
+    uint256 public sigBountyProgramEDUSupply;
+
+    // Flags
+    bool public isTokenSellOpen;
+    uint256 public LockEDUTeam;
+
+    // Price
+    uint256 public EDU_PER_ETH;
+    uint256 public currentBalance;
 
     // Running totals
     uint256 public totalWEIInvested = 0;                                        // Total WEI invested
-    uint256 public totalEDUSLeft = 0;                                           // Total EDU left
-    uint256 public totalEDUSAllocated = 0;                                      // Total EDU allocated
-    mapping (address => uint256) public WEIContributed;                         // Total WEI Per Account
+    uint256 public totalEDUsold = 0;                                            // Total EDUs sold
+    uint256 public totalEDUSLeft = 0;                                           // Total EDUs left
 
-    // Owner of account approves the transfer of an amount to another account
-    mapping(address => mapping (address => uint256)) allowed;
-
+    // MODIFIERS
     // Functions with this modifier can only be executed by the owner of following smart contract
     modifier onlyOwner() {
         if (msg.sender != ownerAddress) {
@@ -91,27 +66,11 @@ contract EDUToken is StandardToken {
         _;
     }
 
-    // Minimal contribution which will be processed is 0.5 ETH
-    modifier minimalContribution() {
-        require(500000000000000000 <= msg.value);
+    // Preventing
+    modifier validDestination( address to ) {
+        require(to != address(0x0));
+        require(to != address(this) );
         _;
-    }
-
-    // Freeze all EDU token transfers during sale period
-    modifier freezeDuringEDUtokenSale() {
-        if ( (msg.sender == ownerAddress) ||
-             (msg.sender == contributionsAddress) ||
-             (msg.sender == presaleAddress) ||
-             (msg.sender == saleAddress) ||
-             (msg.sender == sigBountyProgramAddress) ) {
-            _;
-        } else {
-            if((block.timestamp > preSaleStartTime && block.timestamp < preSaleEndTime) || (block.timestamp > saleStartTime && block.timestamp < saleEndTime)) {
-                revert();
-            } else {
-                _;
-            }
-        }
     }
 
     // Freeze EDU tokens for TeamAndAdvisers for 1 year after the end of the presale
@@ -122,185 +81,140 @@ contract EDUToken is StandardToken {
         _;
     }
 
+
     // INITIALIZATIONS FUNCTION
     function EDUToken(
-        address _presaleAddress,
         address _saleAddress,
         address _sigTeamAndAdvisersAddress,
         address _sigBountyProgramAddress,
-        address _contributionsAddress
-    ) {
-        certifier = Certifier(0x1e2F058C43ac8965938F6e9CA286685A3E63F24E);
+        address _certifierAddress,
+        address _contributionsAddress,
+        uint256 _EDU_PER_ETH
+    )
+        public
+    {
+        certifier = Certifier(_certifierAddress);
+
+        // Set initial price of EDUTokens
+        EDU_PER_ETH = _EDU_PER_ETH;
+
+        // Owner of the contract
         ownerAddress = msg.sender;                                                               // Store owners address
-        presaleAddress = _presaleAddress;                                                        // Store presale address
+
+        // Store addresses
         saleAddress = _saleAddress;
-        sigTeamAndAdvisersAddress = _sigTeamAndAdvisersAddress;                                  // Store sale address
+        sigTeamAndAdvisersAddress = _sigTeamAndAdvisersAddress;
         sigBountyProgramAddress = _sigBountyProgramAddress;
         contributionsAddress = _contributionsAddress;
+        certifierAddress = _certifierAddress;
 
-        preSaleStartTime = 1511179200;                                                           // Start of presale right after end of early presale period
-        preSaleEndTime = 1514764799;                                                             // End of the presale period 1 week after end of early presale
-        LockEDUTeam = preSaleEndTime + 1 years;                                                  // EDU tokens allocated for the team will be freezed for one year
+        // Initial EDU amounts
+        TotalEDUSupply = 48000000*1000000000000000000;
+        TokensForSale = 34800000*1000000000000000000;
+        OSUniEDUSupply = 8400000*1000000000000000000;
+        sigTeamAndAdvisersEDUSupply = 3840000*1000000000000000000;              // EDU tokens supply allocated for team and advisers
+        sigBountyProgramEDUSupply = 960000*1000000000000000000;                 // EDU tokens supply allocated for bounty program
 
-        earlyPresaleEDUSupply = maxEarlyPresaleEDUSupply;                                        // MAX TOTAL DURING EARLY PRESALE (2 601 600 EDU Tokens)
-        PresaleEDUSupply = maxPresaleEDUSupply;                                                  // MAX TOTAL DURING PRESALE (2 198 400 EDU Tokens)
+        transfer(contributionsAddress, OSUniEDUSupply);
+        transfer(saleAddress, TokensForSale);
+        transfer(sigTeamAndAdvisersAddress, sigTeamAndAdvisersEDUSupply);
+        transfer(sigBountyProgramAddress, sigBountyProgramEDUSupply);
 
-        balances[contributionsAddress] = OSUniEDUSupply;                                         // Allocating EDU tokens for Open Source University             // Allocating EDU tokens for early presale
-        balances[presaleAddress] = SafeMath.add(maxPresaleEDUSupply, maxEarlyPresaleEDUSupply);  // Allocating EDU tokens for presale
-        balances[saleAddress] = SaleEDUSupply;                                                   // Allocating EDU tokens for sale
-        balances[sigTeamAndAdvisersAddress] = sigTeamAndAdvisersEDUSupply;                       // Allocating EDU tokens for team and advisers
-        balances[sigBountyProgramAddress] = sigBountyProgramEDUSupply;                           // Bounty program address
+        totalSupply_ = TotalEDUSupply;                                           // Total EDU Token supply
 
-
-        totalEDUSAllocated = OSUniEDUSupply + sigTeamAndAdvisersEDUSupply + sigBountyProgramEDUSupply;
-        totalEDUSLeft = SafeMath.sub(TotalEDUSupply, totalEDUSAllocated);                        // EDU Tokens left for sale
-
-        totalSupply = TotalEDUSupply;                                                            // Total EDU Token supply
+        isTokenSellOpen = false;
+        LockEDUTeam = 1511179200 + 1 years;
     }
 
-    // FALL BACK FUNCTION TO ALLOW ETHER CONTRIBUTIONS
-    function()
-        payable
-        minimalContribution
-    {
-        require(allowContribution);
 
-        // Only PICOPS certified addresses will be allowed to participate
+    // FALLBACK FUNCTION
+    function()
+        public
+        payable
+        validDestination(msg.sender)
+    {
+        require(isTokenSellOpen);
+
+        // Check if contributor passed KYC
         if (!certifier.certified(msg.sender)) {
             revert();
         }
 
         // Transaction value in Wei
         uint256 amountInWei = msg.value;
+        require(amountInWei > 0);
 
-        // Initial amounts
+        // Transaction value in EDU
         uint256 amountOfEDU = 0;
+        amountOfEDU = amountInWei.mul(EDU_PER_ETH).div(1000000000000000000);
 
-        if (block.timestamp > preSaleStartTime && block.timestamp < preSaleEndTime) {
-            amountOfEDU = amountInWei.mul(EDU_PER_ETH_EARLY_PRE_SALE).div(100000000000000);
-            if(!(WEIContributed[msg.sender] > 0)) {
-                amountOfEDU += EDU_KYC_BONUS;  // Bonus for KYC procedure
-            }
-            if (earlyPresaleEDUSupply > 0 && earlyPresaleEDUSupply >= amountOfEDU) {
-                require(updateEDUBalanceFunc(presaleAddress, amountOfEDU));
-                earlyPresaleEDUSupply = earlyPresaleEDUSupply.sub(amountOfEDU);
-            } else if (PresaleEDUSupply > 0) {
-                if (earlyPresaleEDUSupply != 0) {
-                    PresaleEDUSupply = PresaleEDUSupply.add(earlyPresaleEDUSupply);
-                    earlyPresaleEDUSupply = 0;
-                }
-                amountOfEDU = amountInWei.mul(EDU_PER_ETH_PRE_SALE).div(100000000000000);
-                if(!(WEIContributed[msg.sender] > 0)) {
-                    amountOfEDU += EDU_KYC_BONUS;
-                }
-                require(PresaleEDUSupply >= amountOfEDU);
-                require(updateEDUBalanceFunc(presaleAddress, amountOfEDU));
-                PresaleEDUSupply = PresaleEDUSupply.sub(amountOfEDU);
-            } else {
-                revert();
-            }
-        } else if (block.timestamp > saleStartTime && block.timestamp < saleEndTime) {
-            // Sale period
-            amountOfEDU = amountInWei.mul(EDU_PER_ETH_SALE).div(100000000000000);
-            require(totalEDUSLeft >= amountOfEDU);
-            require(updateEDUBalanceFunc(saleAddress, amountOfEDU));
-        } else {
-            // Outside contribution period
-            revert();
-        }
-
-        // Update total WEI Invested
-        totalWEIInvested = totalWEIInvested.add(amountInWei);
-        assert(totalWEIInvested > 0);
-        // Update total WEI Invested by account
-        uint256 contributedSafe = WEIContributed[msg.sender].add(amountInWei);
-        assert(contributedSafe > 0);
-        WEIContributed[msg.sender] = contributedSafe;
+        currentBalance = this.balanceOf(saleAddress);
+        require(currentBalance >= amountOfEDU);
 
         // Transfer contributions to Open Source University
         contributionsAddress.transfer(amountInWei);
+        // Transfer the EDU tokens
+        this.transfer(msg.sender, amountOfEDU);
 
-        // CREATE EVENT FOR SENDER
-        CreatedEDU(msg.sender, amountOfEDU);
-    }
+        // Update total WEI Invested
+        totalWEIInvested = totalWEIInvested.add(amountInWei);
+        totalEDUsold = totalEDUsold.add(amountOfEDU);
 
-    /**
-     * @dev Function for updating the balance and double checks allocated EDU tokens
-     * @param _from The address that will send EDU tokens.
-     * @param _amountOfEDU The amount of tokens which will be send to contributor.
-     * @return A boolean that indicates if the operation was successful.
-     */
-    function updateEDUBalanceFunc(address _from, uint256 _amountOfEDU) internal returns (bool) {
-        // Update total EDU balance
-        totalEDUSLeft = totalEDUSLeft.sub(_amountOfEDU);
-        totalEDUSAllocated += _amountOfEDU;
+        uint256 balanceSafe = balances[msg.sender].add(amountOfEDU);
+        assert(balanceSafe > 0);
+        balances[msg.sender] = balanceSafe;
+        uint256 balanceDiv = balances[saleAddress].sub(amountOfEDU);
+        balances[saleAddress] = balanceDiv;
 
-        // Validate EDU allocation
-        if (totalEDUSAllocated <= TotalEDUSupply && totalEDUSAllocated > 0) {
-            // Update user EDU balance
-            uint256 balanceSafe = balances[msg.sender].add(_amountOfEDU);
-            assert(balanceSafe > 0);
-            balances[msg.sender] = balanceSafe;
-            uint256 balanceDiv = balances[_from].sub(_amountOfEDU);
-            balances[_from] = balanceDiv;
-            return true;
-        } else {
-            totalEDUSLeft = totalEDUSLeft.add(_amountOfEDU);
-            totalEDUSAllocated -= _amountOfEDU;
-            return false;
-        }
+        totalEDUSLeft = this.balanceOf(saleAddress);    // ??? is this going to be updated before current block is mined
+
+        emit Transfer(saleAddress, msg.sender, amountOfEDU);
+        emit EDUtransfered(msg.sender, amountOfEDU);
+        emit ETHcontributed(msg.sender, msg.value.div(1000000000000000000));
     }
 
     /**
      * @dev Set contribution flag status
-     * @param _allowContribution This is additional parmition for the contributers
+     * @param _allowContribution This allows EDU token sale to begin
      * @return A boolean that indicates if the operation was successful.
      */
-    function setAllowContributionFlag(bool _allowContribution) public returns (bool success) {
+    function setAllowContributionFlag(bool _allowContribution) public returns (bool) {
         require(msg.sender == ownerAddress);
-        allowContribution = _allowContribution;
-        return true;
+        isTokenSellOpen = _allowContribution;
+        return isTokenSellOpen;
     }
 
     /**
-     * @dev Set the sale period
-     * @param _saleStartTime Sets the starting time of the sale period
-     * @param _saleEndTime Sets the end time of the sale period
-     * @return A boolean that indicates if the operation was successful.
+     * @dev Set genuine burning mechanism of EDU token in such a way also to
+     *      update totalSupply of EDU tokens
+     * @param _nrEDUToBurn  This argument specifies the amount of EDU tokens
+     *      which will be burned from OSU token sale address.
+     * @return Balance after burning process in token sale address
      */
-    function setSaleTimes(uint256 _saleStartTime, uint256 _saleEndTime) public returns (bool success) {
+    function burningOfEDU(uint256 _nrEDUToBurn) public returns (uint256) {
         require(msg.sender == ownerAddress);
-        saleStartTime = _saleStartTime;
-        saleEndTime = _saleEndTime;
-        return true;
+        require(_nrEDUToBurn > 0);
+        uint256 curBalance = this.balanceOf(saleAddress);
+        require(curBalance >= _nrEDUToBurn);
+        balances[saleAddress] = curBalance.sub(_nrEDUToBurn);
+        totalSupply_ = totalSupply_.sub(_nrEDUToBurn);
+        return balances[saleAddress];
     }
 
-    /**
-     * @dev Set change the presale period if necessary
-     * @param _preSaleStartTime Sets the starting time of the presale period
-     * @param _preSaleEndTime Sets the end time of the presale period
-     * @return A boolean that indicates if the operation was successful.
-     */
-    function setPresaleTime(uint256 _preSaleStartTime, uint256 _preSaleEndTime) public returns (bool success) {
+    function setEDUPrice(uint256 _valSale) public returns (uint256) {
         require(msg.sender == ownerAddress);
-        preSaleStartTime = _preSaleStartTime;
-        preSaleEndTime = _preSaleEndTime;
-        return true;
+        EDU_PER_ETH = _valSale;
+        return EDU_PER_ETH;
     }
 
-    function setEDUPrice(
-        uint256 _valEarlyPresale,
-        uint256 _valPresale,
-        uint256 _valSale
-    ) public returns (bool success) {
+    function setTeamAndAdvisersTokensPeriod(uint256 _value) public returns (uint256) {
         require(msg.sender == ownerAddress);
-        EDU_PER_ETH_EARLY_PRE_SALE = _valEarlyPresale;
-        EDU_PER_ETH_PRE_SALE = _valPresale;
-        EDU_PER_ETH_SALE = _valSale;
-        return true;
+        LockEDUTeam = _value;
+        return LockEDUTeam;
     }
 
     function updateCertifier(address _address) public returns (bool success) {
+        require(msg.sender == ownerAddress);
         certifier = Certifier(_address);
         return true;
     }
@@ -311,11 +225,11 @@ contract EDUToken is StandardToken {
     }
 
     // Transfer the balance from owner's account to another account
-    function transfer(address _to, uint256 _amount) freezeDuringEDUtokenSale freezeTeamAndAdvisersEDUTokens(msg.sender) returns (bool success) {
+    function transfer(address _to, uint256 _amount) freezeTeamAndAdvisersEDUTokens(msg.sender) returns (bool success) {
         if (balances[msg.sender] >= _amount && _amount > 0 && balances[_to] + _amount > balances[_to]) {
             balances[msg.sender] -= _amount;
             balances[_to] += _amount;
-            Transfer(msg.sender, _to, _amount);
+            emit Transfer(msg.sender, _to, _amount);
             return true;
         } else {
             return false;
@@ -328,15 +242,16 @@ contract EDUToken is StandardToken {
     // fees in sub-currencies; the command should fail unless the _from account has
     // deliberately authorized the sender of the message via some mechanism; we propose
     // these standardized APIs for approval:
-    function transferFrom(address _from, address _to, uint256 _amount) freezeDuringEDUtokenSale freezeTeamAndAdvisersEDUTokens(_from) returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _amount) freezeTeamAndAdvisersEDUTokens(_from) returns (bool success) {
         if (balances[_from] >= _amount
              && allowed[_from][msg.sender] >= _amount
              && _amount > 0
              && balances[_to] + _amount > balances[_to]) {
+
             balances[_from] -= _amount;
             allowed[_from][msg.sender] -= _amount;
             balances[_to] += _amount;
-            Transfer(_from, _to, _amount);
+            emit Transfer(_from, _to, _amount);
             return true;
         } else {
             return false;
@@ -345,14 +260,15 @@ contract EDUToken is StandardToken {
 
     // Allow _spender to withdraw from your account, multiple times, up to the _value amount.
     // If this function is called again it overwrites the current allowance with _value.
-    function approve(address _spender, uint256 _amount) freezeDuringEDUtokenSale freezeTeamAndAdvisersEDUTokens(msg.sender) returns (bool success) {
+    function approve(address _spender, uint256 _amount) freezeTeamAndAdvisersEDUTokens(msg.sender) returns (bool success) {
         allowed[msg.sender][_spender] = _amount;
-        Approval(msg.sender, _spender, _amount);
+        emit Approval(msg.sender, _spender, _amount);
         return true;
     }
 
     function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
         return allowed[_owner][_spender];
     }
+
 
 }

@@ -1,0 +1,26 @@
+{
+  "name": "EDUToken",
+  "version": "1.0.0",
+  "description": "EDU token contract that powers the OS.University Network",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenSourceUniversity/EDUToken.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OpenSourceUniversity/EDUToken/issues"
+  },
+  "homepage": "https://github.com/OpenSourceUniversity/EDUToken#readme",
+  "dependencies": {
+    "openzeppelin-solidity": "1.9.0"
+  }
+}
