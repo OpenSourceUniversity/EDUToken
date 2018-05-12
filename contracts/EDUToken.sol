@@ -129,11 +129,6 @@ contract EDUToken is StandardToken {
         emit ETHcontributed(msg.sender, msg.value.div(1000000000000000000));
     }
 
-    /**
-     * @dev Set contribution flag status
-     * @param _allowContribution This allows EDU token sale to begin
-     * @return A boolean that indicates if the operation was successful.
-     */
     function setAllowContributionFlag(bool _allowContribution) public returns (bool) {
         require(msg.sender == ownerAddress);
         isTokenSellOpen = _allowContribution;
