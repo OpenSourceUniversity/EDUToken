@@ -24,7 +24,6 @@ contract EDUToken is StandardToken {
     string public constant name = "EDU Token";
     string public constant symbol = "EDUX";
     uint256 public constant decimals = 18;
-    string public version = "2.0";
 
     address public ownerAddress;
     address public saleAddress;
@@ -159,12 +158,6 @@ contract EDUToken is StandardToken {
         require(msg.sender == ownerAddress);
         EDU_PER_ETH = _valSale;
         return EDU_PER_ETH;
-    }
-
-    function setTeamAndAdvisersTokensPeriod(uint256 _value) public returns (uint256) {
-        require(msg.sender == ownerAddress);
-        LockEDUTeam = _value;
-        return LockEDUTeam;
     }
 
     function updateCertifier(address _address) public returns (bool success) {
