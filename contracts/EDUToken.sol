@@ -48,23 +48,9 @@ contract EDUToken is StandardToken {
     uint256 public totalEDUsold = 0;
     uint256 public totalEDUSLeft = 0;
 
-    modifier onlyOwner() {
-        if (msg.sender != ownerAddress) {
-            revert();
-        }
-        _;
-    }
-
     modifier validDestination( address to ) {
         require(to != address(0x0));
         require(to != address(this) );
-        _;
-    }
-
-    modifier freezeTeamAndAdvisersEDUTokens(address _address) {
-        if (_address == sigTeamAndAdvisersAddress) {
-            if (LockEDUTeam > block.timestamp) { revert(); }
-        }
         _;
     }
 
