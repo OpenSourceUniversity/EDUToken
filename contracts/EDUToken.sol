@@ -1,8 +1,7 @@
 pragma solidity ^0.4.21;
 
-import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
-import 'openzeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import "openzeppelin-solidity/contracts/token/ERC20/BurnableToken.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract Certifier {
     event Confirmed(address indexed who);
@@ -13,7 +12,7 @@ contract Certifier {
     function getUint(address, string) public constant returns (uint);
 }
 
-contract EDUToken is StandardToken {
+contract EDUToken is BurnableToken {
     using SafeMath for uint256;
 
     Certifier public certifier;
