@@ -42,8 +42,12 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, Ownable, Certifiab
         }
     }
 
-    function changeTokenWallet(address _tokenWallet) onlyOwner {
+    function changeTokenWallet(address _tokenWallet) public onlyOwner {
         tokenWallet = _tokenWallet;
+    }
+
+    function changeWallet(address _wallet) public onlyOwner {
+        wallet = _wallet;
     }
 
 }
