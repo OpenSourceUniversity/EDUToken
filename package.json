@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/OpenSourceUniversity/EDUToken#readme",
   "dependencies": {
-    "openzeppelin-solidity": "1.9.0"
+    "openzeppelin-solidity": "1.9.0",
+    "truffle-ledger-provider": "0.0.1"
   }
 }
