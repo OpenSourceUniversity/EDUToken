@@ -5,8 +5,7 @@ import "./Certifiable.sol";
 
 
 contract KYCToken is ERC20, Certifiable {
-    mapping (address => bool) public icoBuyers;
-    mapping (address => bool) public kycVerified;
+    mapping (address => bool) public kycPending;
 
     constructor(address _certifier) public
         Certifiable(_certifier)
@@ -14,16 +13,17 @@ contract KYCToken is ERC20, Certifiable {
 
     }
 
-    modifier isKnownCustomer() {
-        require(!icoBuyers[msg.sender] || certifier.certified(msg.sender));
+    modifier isKnownCustomer(address _address) {
+        require(!kycPending[_address] || certifier.certified(_address));
+        if (kycPending[_address]) {
+            kycPending[_address] = false;
+        }
         _;
     }
 
     function delayedTransferFrom(address _tokenWallet, address _to, uint256 _value) public returns (bool) {
-        require(!icoBuyers[_to]);
         transferFrom(_tokenWallet, _to, _value);
-        icoBuyers[_to] = true;
-        kycVerified[_to] = false;
+        kycPending[_to] = true;
     }
 
 }
