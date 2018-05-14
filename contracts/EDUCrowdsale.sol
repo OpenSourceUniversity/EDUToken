@@ -1,6 +1,7 @@
 pragma solidity ^0.4.23;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol";
 import "openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol";
 import "openzeppelin-solidity/contracts/crowdsale/emission/AllowanceCrowdsale.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -21,16 +22,11 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, Ownable, Certifiab
         uint256 _cap,
         address _certifier
     ) public
+      Crowdsale(_rate, _wallet, _token)
       AllowanceCrowdsale(_tokenWallet)
       CappedCrowdsale(_cap)
       Certifiable(_certifier)
     {
-      require(_rate > 0);
-      require(_wallet != address(0));
-      require(_token != address(0));
-
-      rate = _rate;
-      wallet = _wallet;
       token = _token;
     }
 
