@@ -12,3 +12,6 @@ OS.University (Open Source University)  is world’s first distributed academic 
 | Burnable          | yes       |
 | ERC20 compliant   | yes       |
 | ERC827 compliant  | yes       |
+
+## Security
+In case of security issues please report them to [security@os.university](mailto:security@os.university).
