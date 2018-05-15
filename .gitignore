@@ -15,3 +15,5 @@ scTopics
 !.vscode/extensions.json
 
 env/
+
+contracts/openzeppelin-solidity/
