@@ -3,13 +3,14 @@ pragma solidity ^0.4.23;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/crowdsale/Crowdsale.sol";
 import "openzeppelin-solidity/contracts/crowdsale/validation/CappedCrowdsale.sol";
+import "openzeppelin-solidity/contracts/crowdsale/validation/TimedCrowdsale.sol";
 import "openzeppelin-solidity/contracts/crowdsale/emission/AllowanceCrowdsale.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./EDUToken.sol";
 import "./kyc/Certifiable.sol";
 
 
-contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, Ownable, Certifiable {
+contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ownable, Certifiable {
     using SafeMath for uint256;
 
     EDUToken public token;
@@ -20,11 +21,14 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, Ownable, Certifiab
         EDUToken _token,
         address _tokenWallet,
         uint256 _cap,
+        uint256 _openingTime,
+        uint256 _closingTime,
         address _certifier
     ) public
       Crowdsale(_rate, _wallet, _token)
       AllowanceCrowdsale(_tokenWallet)
       CappedCrowdsale(_cap)
+      TimedCrowdsale(_openingTime, _closingTime)
       Certifiable(_certifier)
     {
         token = _token;
