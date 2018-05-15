@@ -12,7 +12,7 @@ module.exports = function(deployer) {
   var rate = 1000,
       wallet = "0xFaa1447B9Ae34C3893b486b61906B5415106eF57",
       tokenWallet = "0xFaa1447B9Ae34C3893b486b61906B5415106eF57",
-      cap = 34000000000000000000000;
+      cap = 34000 * (10 ** 18);
 
   console.log("Using certifier " + certifier);
 
