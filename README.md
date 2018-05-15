@@ -1,4 +1,5 @@
-# [OS.University](https://os.university) - EDU Token
+# ![Logo](edu-logo.png) [OS.University](https://os.university) - EDU Token
+
 EDU token contract that powers the OS.University Network
 
 ## Prelude
