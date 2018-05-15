@@ -27,7 +27,7 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, Ownable, Certifiab
       CappedCrowdsale(_cap)
       Certifiable(_certifier)
     {
-      token = _token;
+        token = _token;
     }
 
     function _deliverTokens(address _beneficiary, uint256 _tokenAmount) internal {

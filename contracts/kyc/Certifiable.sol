@@ -1,7 +1,7 @@
 pragma solidity ^0.4.23;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import './Certifier.sol';
+import "./Certifier.sol";
 
 
 contract Certifiable is Ownable {
@@ -9,7 +9,7 @@ contract Certifiable is Ownable {
     event CertifierChanged(address indexed newCertifier);
 
     constructor(address _certifier) public {
-        certifier = Certifier( _certifier);
+        certifier = Certifier(_certifier);
     }
 
     function updateCertifier(address _address) public onlyOwner returns (bool success) {
