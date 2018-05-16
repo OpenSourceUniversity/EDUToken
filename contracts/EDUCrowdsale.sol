@@ -42,11 +42,39 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ow
         }
     }
 
-    function changeTokenWallet(address _tokenWallet) public onlyOwner {
+    /**
+     * @dev Returns the rate of tokens per wei at the present time.
+     * Note that, as price _increases_ with time, the rate _decreases_.
+     * @return The number of tokens a buyer gets per wei at a given time
+     */
+    function getCurrentRate() public view returns (uint256) {
+        if (block.timestamp < 1528718400) {
+            return 1050;
+        } else if (block.timestamp < 1529323200) {
+            return 950;
+        } else if (block.timestamp < 1529928000) {
+            return 850;
+        } else {
+            return 750;
+        }
+    }
+
+    /**
+     * @dev Overrides parent method taking into account variable rate.
+     * @param _weiAmount The value in wei to be converted into tokens
+     * @return The number of tokens _weiAmount wei will buy at present time
+     */
+    function _getTokenAmount(uint256 _weiAmount) internal view returns (uint256)
+    {
+        uint256 currentRate = getCurrentRate();
+        return currentRate.mul(_weiAmount);
+    }
+
+    function changeTokenWallet(address _tokenWallet) external onlyOwner {
         tokenWallet = _tokenWallet;
     }
 
-    function changeWallet(address _wallet) public onlyOwner {
+    function changeWallet(address _wallet) external onlyOwner {
         wallet = _wallet;
     }
 
