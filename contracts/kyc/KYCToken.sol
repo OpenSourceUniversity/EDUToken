@@ -5,8 +5,11 @@ import "./Certifiable.sol";
 
 
 contract KYCToken is ERC20, Certifiable {
-    mapping (address => bool) public kycPending;
-    mapping (address => bool) public managers;
+    mapping(address => bool) public kycPending;
+    mapping(address => bool) public managers;
+
+    event ManagerAdded(address indexed newManager);
+    event ManagerRemoved(address indexed removedManager);
 
     modifier onlyManager() {
         require(managers[msg.sender] == true);
@@ -33,10 +36,12 @@ contract KYCToken is ERC20, Certifiable {
 
     function addManager(address _address) external onlyOwner {
         managers[_address] = true;
+        emit ManagerAdded(_address);
     }
 
     function removeManager(address _address) external onlyOwner {
         managers[_address] = false;
+        emit ManagerRemoved(_address);
     }
 
 }
