@@ -143,6 +143,20 @@ contract("EventsTest", function (accounts) {
               assert.equal(log.event, "TokenPurchase");
            });
         });
+
+        it('token wallet changed event emited', async function () {
+            await crowdsale.changeTokenWallet(accounts[1]).then((result) => {
+                var log = result.logs[0];
+                assert.equal(log.event, "TokenWalletChanged");
+            });
+        });
+
+        it('wallet changed event emited', async function () {
+            await crowdsale.changeWallet(accounts[1]).then((result) => {
+                var log = result.logs[0];
+                assert.equal(log.event, "WalletChanged");
+            });
+        });
     });
 });
 
