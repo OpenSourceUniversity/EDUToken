@@ -164,7 +164,7 @@ contract("EDUCrowdsale", function (accounts) {
         let investorBalance = await eduToken.balanceOf(investor);
         assert(investorBalance.eq(value * rate));
         certifier.certify(investor);
-        const valOverCap = 2 * DECIMAL;
+        const valOverCap = 20 * DECIMAL;
         try {
             await crowdsale.sendTransaction({value: valOverCap, from: investor});
             assert.fail('Expected revert not received');
@@ -296,4 +296,3 @@ function increaseTimeTo (target) {
 function latestTime () {
     return web3.eth.getBlock('latest').timestamp;
 }
-
