@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "./Certifiable.sol";
 
 
@@ -27,11 +26,6 @@ contract KYCToken is ERC20, Certifiable {
     constructor(address _certifier) public Certifiable(_certifier)
     {
 
-    }
-
-    function delayedTransferFrom(address _tokenWallet, address _to, uint256 _value) public onlyManager returns (bool) {
-        transferFrom(_tokenWallet, _to, _value);
-        kycPending[_to] = true;
     }
 
     function addManager(address _address) external onlyOwner {

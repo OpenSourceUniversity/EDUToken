@@ -41,4 +41,9 @@ contract EDUToken is BurnableToken, KYCToken, ERC827Token {
         return super.decreaseApproval(_spender, _subtractedValue);
     }
 
+    function delayedTransferFrom(address _tokenWallet, address _to, uint256 _value) public onlyManager returns (bool) {
+        transferFrom(_tokenWallet, _to, _value);
+        kycPending[_to] = true;
+    }
+
 }
