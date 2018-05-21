@@ -25,7 +25,7 @@ contract EDUToken is BurnableToken, KYCToken, ERC827Token {
         return super.transfer(_to, _value);
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) public isKnownCustomer(_to) returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value) public isKnownCustomer(_from) returns (bool) {
         return super.transferFrom(_from, _to, _value);
     }
 
