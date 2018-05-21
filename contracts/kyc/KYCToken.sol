@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./Certifiable.sol";
 
 
-contract KYCToken is ERC20, Certifiable {
+contract KYCToken is Certifiable {
     mapping(address => bool) public kycPending;
     mapping(address => bool) public managers;
 
