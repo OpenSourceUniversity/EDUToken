@@ -14,6 +14,8 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ow
     using SafeMath for uint256;
 
     EDUToken public token;
+    event TokenWalletChanged(address indexed newTokenWallet);
+    event WalletChanged(address indexed newWallet);
 
     constructor(
         uint256 _rate,
@@ -25,7 +27,7 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ow
         uint256 _closingTime,
         address _certifier
     ) public
-      Crowdsale(_rate, _wallet, _token)
+      Crowdsale(getCurrentRate(), _wallet, _token)
       AllowanceCrowdsale(_tokenWallet)
       CappedCrowdsale(_cap)
       TimedCrowdsale(_openingTime, _closingTime)
@@ -71,11 +73,15 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ow
     }
 
     function changeTokenWallet(address _tokenWallet) external onlyOwner {
+        require(_tokenWallet != address(0x0));
         tokenWallet = _tokenWallet;
+        emit TokenWalletChanged(_tokenWallet);
     }
 
     function changeWallet(address _wallet) external onlyOwner {
+        require(_wallet != address(0x0));
         wallet = _wallet;
+        emit WalletChanged(_wallet);
     }
 
 }
