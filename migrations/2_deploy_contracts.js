@@ -9,8 +9,7 @@ module.exports = function(deployer) {
   var certifier = certifierAddresses[
     process.env.DEPLOY_PRODUCTION == "true" ? "mainnet" : "kovan"
   ];
-  var rate = 1000,
-      wallet = "0xFaa1447B9Ae34C3893b486b61906B5415106eF57",
+  var wallet = "0xFaa1447B9Ae34C3893b486b61906B5415106eF57",
       tokenWallet = "0xFaa1447B9Ae34C3893b486b61906B5415106eF57",
       cap = 34000 * (10 ** 18),
       openingTime = 1528113600,
@@ -25,7 +24,6 @@ module.exports = function(deployer) {
     .then(() => {
       return deployer.deploy(
         EDUCrowdsale,
-        rate,
         wallet,
         EDUToken.address,
         tokenWallet,

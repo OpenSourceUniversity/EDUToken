@@ -19,9 +19,9 @@ const duration = {
 IMPORTANT! ganache should be restarted after execution of tests for proper work
  */
 contract("EDUCrowdsale", function (accounts) {
-    const rate = 1050;
     const wallet = accounts[0];
     const tokenWallet = accounts[8];
+    let rate;
     let cap = new BigNumber(web3.toWei(34, 'ether'));
     let crowdsale;
     let certifier;
@@ -36,8 +36,7 @@ contract("EDUCrowdsale", function (accounts) {
         this.closingTime = this.openingTime + duration.weeks(4);
         certifier = await Certifier.new();
         eduToken = await EDUToken.new(certifier.address, {from: tokenWallet});
-        crowdsale = await EDUCrowdsale.new(rate
-            , wallet
+        crowdsale = await EDUCrowdsale.new(wallet
             , eduToken.address
             , tokenWallet
             , cap
@@ -46,6 +45,7 @@ contract("EDUCrowdsale", function (accounts) {
             , certifier.address);
         await eduToken.addManager(crowdsale.address, {from: tokenWallet});
         await eduToken.approve(crowdsale.address, 5000000 * DECIMAL, {from: tokenWallet});
+        rate = await crowdsale.getCurrentRate();
     });
 
     describe('crowdsale new investor', async function () {
@@ -219,8 +219,7 @@ contract("EDUCrowdsale", function (accounts) {
             let balanceOfReciever = await eduToken.balanceOf(accounts[3]);
             oldWalletBalance = await eduToken.balanceOf(tokenWallet);
             newWalletBalance = await eduToken.balanceOf(newTokenWallet);
-            const currentRate = await crowdsale.getCurrentRate();
-            assert(balanceOfReciever.eq(1 * DECIMAL * currentRate));
+            assert(balanceOfReciever.eq(1 * DECIMAL * rate));
             assert(oldWalletBalance.eq(0));
             assert(newWalletBalance.eq(48000000 * DECIMAL - balanceOfReciever));
         });

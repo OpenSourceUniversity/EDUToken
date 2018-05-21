@@ -18,7 +18,6 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ow
     event WalletChanged(address indexed newWallet);
 
     constructor(
-        uint256 _rate,
         address _wallet,
         EDUToken _token,
         address _tokenWallet,

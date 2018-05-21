@@ -20,7 +20,6 @@ IMPORTANT! Tests should be executed one by one, with restart after each, because
 before last mined block.
  */
 contract("rate test", function (accounts) {
-    const rate = 1050;
     const wallet = accounts[0];
     const tokenWallet = accounts[8];
     const cap = new BigNumber(web3.toWei(34000, 'ether'));
@@ -32,8 +31,7 @@ contract("rate test", function (accounts) {
         await advanceBlock();
         certifier = await Certifier.new();
         eduToken = await EDUToken.new(certifier.address, {from: tokenWallet});
-        crowdsale = await EDUCrowdsale.new(rate
-            , wallet
+        crowdsale = await EDUCrowdsale.new(wallet
             , eduToken.address
             , tokenWallet
             , cap
@@ -65,12 +63,12 @@ contract("rate test", function (accounts) {
         // });
 
         // it('presale3', async function () {
-        //     await increaseTimeTo(openingTime + 1);
+        //     await increaseTimeTo(presale3 + 1);
         //     const value = 10 * DECIMAL;
         //     const investor = accounts[1];
         //     await crowdsale.sendTransaction({value: value, from: investor});
         //     let investorBalance = await eduToken.balanceOf(investor);
-        //     assert(investorBalance.eq(value * rate1));
+        //     assert(investorBalance.eq(value * rate3));
         // });
     });
 

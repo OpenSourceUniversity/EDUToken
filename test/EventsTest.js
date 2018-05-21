@@ -47,8 +47,7 @@ contract("EventsTest", function (accounts) {
         this.closingTime = this.openingTime + duration.weeks(4);
         certifier = await Certifier.new();
         eduToken = await EDUToken.new(certifier.address, {from: tokenWallet});
-        crowdsale = await EDUCrowdsale.new(rate
-            , wallet
+        crowdsale = await EDUCrowdsale.new(wallet
             , eduToken.address
             , tokenWallet
             , cap
