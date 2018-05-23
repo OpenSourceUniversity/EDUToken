@@ -16,13 +16,14 @@ const duration = {
 
 
 /*
-IMPORTANT! ganache should be restarted after execution of tests for proper work
+IMPORTANT! ganache should be restarted after execution of tests for proper work.
+Set account balance to 1000 eth.
  */
 contract("EDUCrowdsale", function (accounts) {
     const wallet = accounts[0];
     const tokenWallet = accounts[8];
     let rate;
-    let cap = new BigNumber(web3.toWei(300, 'ether'));
+    let cap = new BigNumber(web3.toWei(340, 'ether'));
     let crowdsale;
     let certifier;
     let eduToken;
@@ -46,6 +47,12 @@ contract("EDUCrowdsale", function (accounts) {
         await eduToken.addManager(crowdsale.address, {from: tokenWallet});
         await eduToken.approve(crowdsale.address, 5000000 * DECIMAL, {from: tokenWallet});
         rate = await crowdsale.getCurrentRate();
+    });
+
+    afterEach(async function () {
+       // for(var i = 0; i < accounts.length; i++){
+       //     console.log("account " + i + ":" +  web3.eth.getBalance(accounts[i]));
+       // }
     });
 
     describe('crowdsale new investor', async function () {
@@ -158,13 +165,13 @@ contract("EDUCrowdsale", function (accounts) {
 
     it('could not contribute over cap', async function () {
         await increaseTimeTo(this.openingTime + 1);
-        const value = 250 * DECIMAL;
+        const value = 300 * DECIMAL;
         const investor = accounts[0];
         await crowdsale.sendTransaction({value: value, from: investor});
         let investorBalance = await eduToken.balanceOf(investor);
         assert(investorBalance.eq(value * rate * 1.15));
         certifier.certify(investor);
-        const valOverCap = 51 * DECIMAL;
+        const valOverCap = 41 * DECIMAL;
         try {
             await crowdsale.sendTransaction({value: valOverCap, from: accounts[9]});
             assert.fail('Expected revert not received');
@@ -226,12 +233,12 @@ contract("EDUCrowdsale", function (accounts) {
 
         it('eth wallet change', async function (){
             await increaseTimeTo(this.openingTime + 1);
-            const newWallet = accounts[5];
+            const newWallet = accounts[7];
             await crowdsale.sendTransaction({value: 1 * DECIMAL, from: accounts[3]});
             crowdsale.changeWallet(newWallet);
             await crowdsale.sendTransaction({value: 2 * DECIMAL, from: accounts[4]});
             const newWalletBalance = web3.eth.getBalance(newWallet);
-            assert(newWalletBalance.eq((100 + 2) * DECIMAL));
+            assert(newWalletBalance.eq((1000 + 2) * DECIMAL));
         });
 
         it('test volume bonus over 50', async function () {
@@ -252,13 +259,14 @@ contract("EDUCrowdsale", function (accounts) {
            assert(investorBalance.eq(value * rate * 1.1));
         });
 
-        it('test volume bonus over 200', async function () {
+        it('test volume bonus over 250', async function () {
            await increaseTimeTo(this.openingTime + 1);
-           const value = 200 * DECIMAL;
-           const investor = accounts[5];
+           const value = 250 * DECIMAL;
+           const investor = accounts[6];
            await crowdsale.sendTransaction({value: value, from: investor});
-           let investorBalance = await eduToken.balanceOf(investor);
-           assert(investorBalance.eq(value * rate * 1.15));
+           let investorBalance = (await eduToken.balanceOf(investor)).toString();
+           let assertion = (value * rate * 1.15).toPrecision(4);
+           assert.equal(investorBalance.substr(0,4), assertion.substr(0,4));
         });
 
     });
