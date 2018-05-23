@@ -68,7 +68,21 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ow
     function _getTokenAmount(uint256 _weiAmount) internal view returns (uint256)
     {
         uint256 currentRate = getCurrentRate();
-        return currentRate.mul(_weiAmount);
+        uint256 volumeBonus = _getVolumeBonus(currentRate, _weiAmount);
+        return currentRate.mul(_weiAmount).add(volumeBonus);
+    }
+
+    function _getVolumeBonus(uint256 _currentRate, uint256 _weiAmount) internal view returns (uint256) {
+        if (_weiAmount >= 50 * (10 ** 18)) {
+            if (_weiAmount >= 150 * (10 ** 18)) {
+                if (_weiAmount >= 250 * (10 ** 18)) {
+                    return _currentRate.mul(_weiAmount).mul(15).div(100);
+                }
+                return _currentRate.mul(_weiAmount).mul(10).div(100);
+            }
+            return _currentRate.mul(_weiAmount).mul(5).div(100);
+        }
+        return 0;
     }
 
     function changeTokenWallet(address _tokenWallet) external onlyOwner {

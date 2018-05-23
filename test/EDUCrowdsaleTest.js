@@ -22,7 +22,7 @@ contract("EDUCrowdsale", function (accounts) {
     const wallet = accounts[0];
     const tokenWallet = accounts[8];
     let rate;
-    let cap = new BigNumber(web3.toWei(34, 'ether'));
+    let cap = new BigNumber(web3.toWei(300, 'ether'));
     let crowdsale;
     let certifier;
     let eduToken;
@@ -158,21 +158,21 @@ contract("EDUCrowdsale", function (accounts) {
 
     it('could not contribute over cap', async function () {
         await increaseTimeTo(this.openingTime + 1);
-        const value = 20 * DECIMAL;
-        const investor = accounts[1];
+        const value = 250 * DECIMAL;
+        const investor = accounts[0];
         await crowdsale.sendTransaction({value: value, from: investor});
         let investorBalance = await eduToken.balanceOf(investor);
-        assert(investorBalance.eq(value * rate));
+        assert(investorBalance.eq(value * rate * 1.15));
         certifier.certify(investor);
-        const valOverCap = 20 * DECIMAL;
+        const valOverCap = 51 * DECIMAL;
         try {
-            await crowdsale.sendTransaction({value: valOverCap, from: investor});
+            await crowdsale.sendTransaction({value: valOverCap, from: accounts[9]});
             assert.fail('Expected revert not received');
         } catch (error) {
             const revertFound = error.message.search('revert') >= 0;
             assert(revertFound, `Expected "revert", got ${error} instead`);
-            investorBalance = await eduToken.balanceOf(investor)
-            assert(investorBalance.eq(value * rate));
+            investorBalance = await eduToken.balanceOf(accounts[9])
+            assert(investorBalance.eq(0));
         }
     });
 
@@ -232,6 +232,33 @@ contract("EDUCrowdsale", function (accounts) {
             await crowdsale.sendTransaction({value: 2 * DECIMAL, from: accounts[4]});
             const newWalletBalance = web3.eth.getBalance(newWallet);
             assert(newWalletBalance.eq((100 + 2) * DECIMAL));
+        });
+
+        it('test volume bonus over 50', async function () {
+           await increaseTimeTo(this.openingTime + 1);
+           const value = 50 * DECIMAL;
+           const investor = accounts[5];
+           await crowdsale.sendTransaction({value: value, from: investor});
+           let investorBalance = await eduToken.balanceOf(investor);
+           assert(investorBalance.eq(value * rate * 1.05));
+        });
+
+        it('test volume bonus over 150', async function () {
+           await increaseTimeTo(this.openingTime + 1);
+           const value = 150 * DECIMAL;
+           const investor = accounts[5];
+           await crowdsale.sendTransaction({value: value, from: investor});
+           let investorBalance = await eduToken.balanceOf(investor);
+           assert(investorBalance.eq(value * rate * 1.1));
+        });
+
+        it('test volume bonus over 200', async function () {
+           await increaseTimeTo(this.openingTime + 1);
+           const value = 200 * DECIMAL;
+           const investor = accounts[5];
+           await crowdsale.sendTransaction({value: value, from: investor});
+           let investorBalance = await eduToken.balanceOf(investor);
+           assert(investorBalance.eq(value * rate * 1.15));
         });
 
     });
