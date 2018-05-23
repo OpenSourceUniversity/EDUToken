@@ -4,12 +4,15 @@ var Certifier = artifacts.require("OsuCertifierMock");
 const DECIMAL = 10 ** 18;
 const BigNumber = web3.BigNumber;
 
-const presale1 = 1528718400;
-const rate1 = 1050;
-const presale2 = 1529323200;
-const rate2 = 850;
-const presale3 = 1529928000;
-const rate3 = 750;
+const rate0 = 1050;
+const presale1 = 1528156799;  // 4th of June 2018 23:59:59 GTC
+const rate1 = 940;
+const presale2 = 1528718400;  // 11th of June 2018 12:00:00 GTC
+const rate2 = 865;
+const presale3 = 1529323200;  // 18th of June 2018 12:00:00 GTC
+const rate3 = 790;
+const presale4 = 1529928000;  // 25th of June 2018 12:00:00 GTC
+const rate4 = 750;
 
 const openingTime = 1528113600;
 const closingTime = 1530446400;
@@ -50,10 +53,19 @@ contract("rate test", function (accounts) {
         //     const investor = accounts[1];
         //     await crowdsale.sendTransaction({value: value, from: investor});
         //     let investorBalance = await eduToken.balanceOf(investor);
-        //     assert(investorBalance.eq(value * rate1));
+        //     assert(investorBalance.eq(value * rate0));
         // });
 
         // it('presale2', async function () {
+        //     await increaseTimeTo(presale1 + 1);
+        //     const value = 10 * DECIMAL;
+        //     const investor = accounts[1];
+        //     await crowdsale.sendTransaction({value: value, from: investor});
+        //     let investorBalance = await eduToken.balanceOf(investor);
+        //     assert(investorBalance.eq(value * rate1));
+        // });
+
+        // it('presale3', async function () {
         //     await increaseTimeTo(presale2 + 1);
         //     const value = 10 * DECIMAL;
         //     const investor = accounts[1];
@@ -62,13 +74,22 @@ contract("rate test", function (accounts) {
         //     assert(investorBalance.eq(value * rate2));
         // });
 
-        // it('presale3', async function () {
+        // it('presale4', async function () {
         //     await increaseTimeTo(presale3 + 1);
         //     const value = 10 * DECIMAL;
         //     const investor = accounts[1];
         //     await crowdsale.sendTransaction({value: value, from: investor});
         //     let investorBalance = await eduToken.balanceOf(investor);
         //     assert(investorBalance.eq(value * rate3));
+        // });
+
+        // it('presale5', async function () {
+        //     await increaseTimeTo(presale4 + 1);
+        //     const value = 10 * DECIMAL;
+        //     const investor = accounts[1];
+        //     await crowdsale.sendTransaction({value: value, from: investor});
+        //     let investorBalance = await eduToken.balanceOf(investor);
+        //     assert(investorBalance.eq(value * rate4));
         // });
     });
 
