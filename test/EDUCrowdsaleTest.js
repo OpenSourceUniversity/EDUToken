@@ -50,9 +50,9 @@ contract("EDUCrowdsale", function (accounts) {
     });
 
     afterEach(async function () {
-       // for(var i = 0; i < accounts.length; i++){
-       //     console.log("account " + i + ":" +  web3.eth.getBalance(accounts[i]));
-       // }
+       for(var i = 0; i < accounts.length; i++){
+           console.log("account " + i + ":" +  web3.eth.getBalance(accounts[i]));
+       }
     });
 
     describe('crowdsale new investor', async function () {

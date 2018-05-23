@@ -49,12 +49,14 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ow
      * @return The number of tokens a buyer gets per wei at a given time
      */
     function getCurrentRate() public view returns (uint256) {
-        if (block.timestamp < 1528718400) {
+        if (block.timestamp < 1528156799) {         // 4th of June 2018 23:59:59 GTC
             return 1050;
-        } else if (block.timestamp < 1529323200) {
-            return 950;
-        } else if (block.timestamp < 1529928000) {
-            return 850;
+        } else if (block.timestamp < 1528718400) {  // 11th of June 2018 12:00:00 GTC
+            return 940;
+        } else if (block.timestamp < 1529323200) {  // 18th of June 2018 12:00:00 GTC
+            return 865;
+        } else if (block.timestamp < 1529928000) {  // 25th of June 2018 12:00:00 GTC
+            return 790;
         } else {
             return 750;
         }
