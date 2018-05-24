@@ -13,6 +13,10 @@ import "./kyc/Certifiable.sol";
 contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ownable, Certifiable {
     using SafeMath for uint256;
 
+    uint256 constant FIFTY_ETH = 50 * (10 ** 18);
+    uint256 constant HUNDRED_AND_FIFTY_ETH = 150 * (10 ** 18);
+    uint256 constant TWO_HUNDRED_AND_FIFTY_ETH = 250 * (10 ** 18);
+
     EDUToken public token;
     event TokenWalletChanged(address indexed newTokenWallet);
     event WalletChanged(address indexed newWallet);
@@ -75,9 +79,9 @@ contract EDUCrowdsale is AllowanceCrowdsale, CappedCrowdsale, TimedCrowdsale, Ow
     }
 
     function _getVolumeBonus(uint256 _currentRate, uint256 _weiAmount) internal view returns (uint256) {
-        if (_weiAmount >= 50 * (10 ** 18)) {
-            if (_weiAmount >= 150 * (10 ** 18)) {
-                if (_weiAmount >= 250 * (10 ** 18)) {
+        if (_weiAmount >= FIFTY_ETH) {
+            if (_weiAmount >= HUNDRED_AND_FIFTY_ETH) {
+                if (_weiAmount >= TWO_HUNDRED_AND_FIFTY_ETH) {
                     return _currentRate.mul(_weiAmount).mul(15).div(100);
                 }
                 return _currentRate.mul(_weiAmount).mul(10).div(100);
