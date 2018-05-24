@@ -6,6 +6,11 @@ var kovanLedgerOptions = {
     accountsOffset: 0
 };
 
+var mainnetLedgerOptions = {
+    networkId: 1,
+    accountsOffset: 0
+};
+
 
 module.exports = {
   networks: {
@@ -22,6 +27,15 @@ module.exports = {
       network_id: kovanLedgerOptions.networkId,
       gas: 4600000,
       gasPrice: 25000000000
+    },
+    mainnet: {
+      provider: new LedgerWalletProvider(
+        mainnetLedgerOptions,
+        "https://mainnet.infura.io/" + infuraApiKey
+      ),
+      network_id: mainnetLedgerOptions.networkId,
+      gas: 1600000,
+      gasPrice: 10000000000
     }
   }
 };
