@@ -34,7 +34,7 @@ module.exports = {
         "https://mainnet.infura.io/" + infuraApiKey
       ),
       network_id: mainnetLedgerOptions.networkId,
-      gas: 1600000,
+      gas: 3525537,
       gasPrice: 10000000000
     }
   }
